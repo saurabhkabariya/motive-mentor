@@ -1,0 +1,37 @@
+{
+  "name": "daily-quotes",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "set NODE_OPTIONS=--no-experimental-fetch --require=./node-polyfill.js && next dev",
+    "clean": "rimraf .next",
+    "build": "set NODE_OPTIONS=--no-experimental-fetch --require=./node-polyfill.js && npm run clean && next build --no-lint",
+    "start": "set NODE_OPTIONS=--no-experimental-fetch --require=./node-polyfill.js && next start",
+    "lint": "next lint",
+    "tailwind": "tailwindcss"
+  },
+  "dependencies": {
+    "@firebase/auth": "^1.10.7",
+    "@firebase/firestore": "^4.7.17",
+    "@next/font": "^14.2.15",
+    "firebase": "^9.23.0",
+    "framer-motion": "^12.19.1",
+    "mongoose": "^8.11.0",
+    "next": "^14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-firebase-hooks": "^5.1.1",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.0",
+    "node-fetch": "^3.3.2",
+    "postcss": "^8.4.31",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^3.3.5"
+  }
+}

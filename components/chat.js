@@ -1,116 +1,108 @@
-// components/Chat.js
-// "use client";
-// import { useState } from "react";
-// import { db, auth } from "@/lib/firebaseConfig";
-// import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-// import { useCollectionData } from "react-firebase-hooks/firestore";
-// import { useTheme } from "@/app/themecontext";
-
-// export default function Chat() {
-//   const [message, setMessage] = useState("");
-//   const messagesRef = collection(db, "messages");
-//   const [messages] = useCollectionData(messagesRef, { idField: "id" });
-//   const { darkMode } = useTheme(); 
-
-//   const sendMessage = async () => {
-//     if (message.trim() === "") return;
-
-//     await addDoc(messagesRef, {
-//       text: message,
-//       createdAt: serverTimestamp(),
-//       user: auth.currentUser.displayName,
-//       avatar: auth.currentUser.photoURL,
-//     });
-
-//     setMessage("");
-//   };
-
-//   return (
-//     <div className={`mx-auto mt-8 p-4 shadow-lg rounded-md ${darkMode ? "bg-gray-900 text-white border-white border-2 rounded" : "bg-gray-100 text-black border-gray-500 border-2 rounded"}`}>
-//       <div className={`h-60 overflow-y-auto mb-4`}>
-//         {messages &&
-//           messages
-//             .sort((a, b) => a.createdAt - b.createdAt)
-//             .map((msg,index) => (
-//               <div key={msg.id || index} className="flex items-center mb-2">
-//                 {/* <img
-//                   src={msg.avatar}
-//                   alt="User Avatar"
-//                   className="w-8 h-8 rounded-full mr-2"
-//                 /> */}
-//                 <div className={`w-10 h-10 rounded-full mr-2 flex justify-center items-center ${darkMode ? "border-white border-2":"border-gray-500 border-2"}`}>{msg.user.charAt(0)}</div>
-//                 <div>
-//                   <p className="font-bold">{msg.user}</p>
-//                   <p className={`${darkMode ? "text-white" : "text-gray-900"}`}>{msg.text}</p>
-//                 </div>
-//               </div>
-//             ))}
-//       </div>
-
-//       <div className="flex">
-//         <input
-//           type="text"
-//           className={`flex-grow p-2 border rounded-md ${darkMode ? "text-white placeholder:text-white" : "text-black placeholder:text-black"}`}
-//           placeholder="Type a message..."
-//           value={message}
-//           onChange={(e) => setMessage(e.target.value)}
-
-//         />
-//         <button
-//           onClick={sendMessage}
-//           className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md"
-//         >
-//           Send
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
-import { useEffect, useState } from "react";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
-import { db } from "../lib/firebaseConfig";
+import { useEffect, useState, useRef } from "react";
 import { useTheme } from "@/app/themecontext";
+import UserAvatar from "./UserAvatar";
+import { getMessages } from "@/app/utils/chatStorage";
 
 const Chat = ({ currentUser }) => {
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef(null);
 
   const { darkMode } = useTheme(); 
 
+  // Scroll to bottom when new messages arrive
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+    scrollToBottom();
+  }, [messages]);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setMessages(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
+  // Function to load messages from localStorage
+  const loadMessages = () => {
+    setLoading(true);
+    try {
+      const storedMessages = getMessages();
+      // Sort messages by createdAt timestamp (similar to Firestore orderBy)
+      const sortedMessages = storedMessages.sort((a, b) => {
+        const aTime = a.createdAt?.seconds || 0;
+        const bTime = b.createdAt?.seconds || 0;
+        return aTime - bTime;
+      });
+      
+      setMessages(sortedMessages);
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return () => unsubscribe(); // Cleanup on unmount
+  useEffect(() => {
+    // Initial load of messages
+    loadMessages();
+    
+    // Set up an interval to check for new messages every few seconds
+    // This simulates the real-time updates from Firestore
+    const intervalId = setInterval(() => {
+      loadMessages();
+    }, 3000);
+    
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
-
-  return (
-    <div className={`p-4 h-[70vh] overflow-y-auto ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
-      {messages.map((msg) => (
+    return (
+    <div className={`p-4 h-[70vh] overflow-y-auto ${darkMode ? "bg-dark-surface text-dark-text" : "bg-background text-text"}`}>
+      {loading && (
+        <div className="flex justify-center items-center h-full">
+          <p className={`${darkMode ? "text-dark-textSecondary" : "text-textSecondary"}`}>Loading messages...</p>
+        </div>
+      )}
+      
+      {!loading && messages.length === 0 && (
+        <div className="flex justify-center items-center h-full">
+          <p className={`${darkMode ? "text-dark-textSecondary" : "text-textSecondary"}`}>No messages yet. Be the first to send a message!</p>
+        </div>
+      )}
+      
+      {!loading && currentUser && messages.map((msg) => (
         <div
           key={msg.id}
-          className={`flex items-center mb-2 ${
+          className={`flex items-center mb-4 ${
             msg.senderId === currentUser.uid ? "justify-end" : "justify-start"
-          }`}
-        >
-          {msg.senderId !== currentUser.uid && (
-            <img src={msg.avatar} alt="User Avatar" className="w-8 h-8 mr-2 rounded-full" />
+          }`}>
+          {msg.senderId !== currentUser?.uid && (
+            <div className="mr-2">
+              <UserAvatar 
+                user={{ 
+                  photoURL: msg.avatar,
+                  displayName: msg.senderName
+                }} 
+                size="md"
+              />
+            </div>
           )}
           <div
-            className={`p-2 rounded-lg ${
-              msg.senderId === currentUser.uid ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
+            className={`p-3 rounded-lg max-w-[80%] ${
+              msg.senderId === currentUser.uid 
+                ? "bg-secondary dark:bg-dark-secondary text-white" 
+                : darkMode ? "bg-dark-surface/80 text-dark-text" : "bg-surface text-text border border-gray-200"
             }`}
           >
-            <p className="text-sm font-semibold">{msg.senderName}</p>
-            <p>{msg.text}</p>
+            <p className="text-sm font-semibold mb-1">{msg.senderName}</p>
+            <p className="break-words">{msg.text}</p>
+            {msg.createdAt && (
+              <p className="text-xs mt-1 opacity-70">
+                {msg.createdAt.toDate?.() ? msg.createdAt.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+              </p>
+            )}
           </div>
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

@@ -1,0 +1,51 @@
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import Navigation from "@/components/navigation";
+import { ThemeProvider } from "./themecontext";
+import ThemeWrapper from "@/components/ThemeWrapper";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import Footer from "@/components/footer";
+import { QuoteProvider } from "./quotecontext";
+import { UserProvider } from "./usercontext";
+import AuthModalContainer from "@/components/AuthModalContainer";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "Motive Mentor",
+  description: "Motive Mentor provides Daily Motivated quotes to help you stay motivated and be focused towards your goals.",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta name="monetag" content="d6ef03b8c2b683319fba93a516a09715" />
+        <meta name="google-site-verification" content="HKgvrxQDwRgmswOq7p_GoG2yId-fcWZkSjyAEGC_ASw" />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-[100vh]`}>
+        <UserProvider>
+          <QuoteProvider>
+            <ThemeProvider>
+              <ThemeWrapper>
+                <Navigation />
+                <GoogleAnalytics />
+                <AuthModalContainer />
+                {children}
+                <Footer />
+              </ThemeWrapper>
+            </ThemeProvider>
+          </QuoteProvider>
+        </UserProvider>
+      </body>
+    </html>
+  );
+}

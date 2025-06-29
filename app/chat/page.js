@@ -1,66 +1,54 @@
-// pages/chat.js
-// "use client";
-// import { useAuthState } from "react-firebase-hooks/auth";
-// import { auth } from "@/lib/firebaseConfig";
-// import Auth from "@/components/auth";
-// import Chat from "@/components/chat";
-// import { useTheme } from "../themecontext";
-
-// export default function ChatPage() {
-//   const [user] = useAuthState(auth);
-//   const { darkMode } = useTheme(); 
-
-//   return (
-//     <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-100 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
-//       <h1 className="text-2xl font-bold mb-4">Motive Mentor Chat</h1>
-//       <Auth user={user} />
-//       {user && <Chat />}
-//     </div>
-//   );
-// }
-
 "use client";
 
-
-import { useState, useEffect } from "react";
-import { auth } from "@/lib/firebaseConfig";
+import { useUser } from "@/app/usercontext";
 import Chat from "@/components/chat";
 import ChatInput from "@/components/ChatInput";
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useTheme } from "../themecontext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { Suspense } from "react";
 
-const ChatPage = () => {
-  const [user, setUser] = useState(null);
-  const { darkMode } = useTheme(); 
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (loggedInUser) => {
-      setUser(loggedInUser);
-    });
-  }, []);
-
-  const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  };
-
+function ChatPageClient() {
+  const { user } = useUser();
   return (
-    <div className={`max-w-lg mx-auto mt-10 border rounded-lg shadow-lg h-full ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
-      <h2 className={`text-xl font-bold text-center rounded-lg p-4 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>Chat Forum</h2>
-      {!user ? (
-        <div className="text-center p-4">
-          <button onClick={handleLogin} className={`p-2 rounded-md cursor-pointer bg-blue-500 text-white`}>
-            Sign in with Google
-          </button>
-        </div>
-      ) : (
+    <div className="max-w-lg mx-auto mt-10 mb-10 border rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300 h-full bg-surface">      
+      <h2 className="text-xl font-bold text-center rounded-t-lg p-4 bg-surface border-b border-primary-light">
+        <span className="text-primary">Chat</span> Forum
+      </h2>
+      
+      <ProtectedRoute
+        redirectTo="/"
+        showAuthModal={true}
+        fallback={
+          <div className="text-center p-8">
+            <p className="mb-4 font-medium">Please sign in to access the chat forum.</p>
+            <p className="text-sm text-muted">
+              You can sign in using the button in the navigation bar above.
+            </p>
+          </div>
+        }
+      >
         <>
           <Chat currentUser={user} />
           <ChatInput user={user} />
         </>
-      )}
+      </ProtectedRoute>
     </div>
   );
-};
+}
 
-export default ChatPage;
+// Export a wrapped version with Suspense
+export default function ChatPage() {  return (
+    <Suspense fallback={
+      <div className="max-w-lg mx-auto mt-10 mb-10 border rounded-lg shadow-xl h-full bg-surface">
+        <h2 className="text-xl font-bold text-center rounded-t-lg p-4 border-b border-primary-light">
+          <span className="text-primary">Chat</span> Forum
+        </h2>
+        <div className="flex items-center justify-center p-12">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-3 border-b-3 border-primary shadow-md"></div>
+        </div>
+      </div>
+    }>
+      <ChatPageClient />
+    </Suspense>
+  );
+}

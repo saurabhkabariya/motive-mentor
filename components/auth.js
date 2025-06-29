@@ -1,31 +1,25 @@
 // components/Auth.js
-import { auth, provider } from "@/lib/firebaseConfig";
-import { signInWithPopup, signOut } from "firebase/auth";
+"use client";
+import { useUser } from "@/app/usercontext";
 
-export default function Auth({ user }) {
-  const signIn = async () => {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Error signing in:", error);
-    }
-  };
+export default function Auth() {
+  const { user, signOut, requestAuthentication } = useUser();
 
   return (
     <div className="flex justify-center mt-4">
       {user ? (
         <button 
-          onClick={() => signOut(auth)}
-          className="bg-red-500 text-white px-4 py-2 rounded-md"
+          onClick={signOut}
+          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
         >
-          Logout
+          Sign Out
         </button>
       ) : (
         <button 
-          onClick={signIn}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          onClick={requestAuthentication}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
         >
-          Login with Google
+          Sign In
         </button>
       )}
     </div>

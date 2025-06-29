@@ -1,0 +1,13 @@
+@echo off
+echo Stopping running node processes...
+taskkill /f /im node.exe 2>nul
+
+echo Copying new configuration files...
+copy /Y tailwind.config.js.new tailwind.config.js
+copy /Y postcss.config.mjs.new postcss.config.mjs
+
+echo Cleaning Next.js cache...
+npx rimraf .next
+
+echo Running Next.js development server...
+npm run dev

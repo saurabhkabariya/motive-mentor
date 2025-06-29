@@ -81,8 +81,7 @@ export default function FeedbackPage() {
         />
         <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">
           Submit Feedback
-        </button>
-      </form>
+        </button>      </form>
 
       {/* Display Feedback */}
       <div className="mt-6 max-w-lg mx-auto">
@@ -105,8 +104,7 @@ export default function FeedbackPage() {
                 </button>
               </li>
             ))}
-          </ul>
-        )}
+          </ul>        )}
       </div>
     </div>
   );

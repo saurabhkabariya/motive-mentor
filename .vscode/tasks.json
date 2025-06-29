@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Next.js Development Server",
+			"type": "shell",
+			"command": "cd \"d:\\Java Script\\Complete website\\daily-quotes\" && npm run dev",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}
