@@ -3,17 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_OPTIONS=--no-experimental-fetch --require=./node-polyfill.js && next dev",
+    "dev": "next dev",
     "clean": "rimraf .next",
-    "build": "set NODE_OPTIONS=--no-experimental-fetch --require=./node-polyfill.js && npm run clean && next build --no-lint",
-    "start": "set NODE_OPTIONS=--no-experimental-fetch --require=./node-polyfill.js && next start",
+    "build": "npm run clean && next build --no-lint",
+    "start": "next start",
     "lint": "next lint",
     "tailwind": "tailwindcss"
   },
   "dependencies": {
     "@firebase/auth": "^1.10.7",
     "@firebase/firestore": "^4.7.17",
-    "@next/font": "^14.2.15",
     "firebase": "^9.23.0",
     "framer-motion": "^12.19.1",
     "mongoose": "^8.11.0",

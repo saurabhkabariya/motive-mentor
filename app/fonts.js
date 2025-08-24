@@ -1,12 +1,14 @@
 // app/fonts.js
-// Using system fonts instead of Google Fonts to avoid network issues
+import { Inter, Roboto_Mono } from 'next/font/google';
 
-export const inter = {
+export const inter = Inter({
+  subsets: ['latin'],
   variable: '--font-inter',
-  className: 'font-sans'
-};
+  display: 'swap',
+});
 
-export const robotoMono = {
+export const robotoMono = Roboto_Mono({
+  subsets: ['latin'],
   variable: '--font-roboto-mono',
-  className: 'font-mono'
-};
+  display: 'swap',
+});

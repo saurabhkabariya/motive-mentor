@@ -1,6 +1,0 @@
-@echo off
-echo Killing any existing node.js processes...
-taskkill /f /im node.exe >nul 2>&1
-echo Starting Next.js Development Server...
-cd /d "%~dp0"
-npm run dev
